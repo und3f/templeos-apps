@@ -12,6 +12,11 @@ side-by-side with printable characters.
 Example usage:
 ```HexView("C:/Once.HC.Z", 8);```
 
+### TicTacToe
+
+TicTacToe game with AI. Work in progress. Current status: able to draw the board.
+![TicTacToe screenshot](/tictactoe.png?raw=true "Game screenshot")
+
 ## Useful references
 1. [Temple OS](https://templeos.org/)
 1. [Tsoding Temple OS repo for
