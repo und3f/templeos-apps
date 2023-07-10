@@ -14,7 +14,15 @@ Example usage:
 
 ### TicTacToe
 
-TicTacToe game with AI. Work in progress. Current status: able to draw the board.
+TicTacToe game with AI. Work in progress. Goals:
+- [x] Draw board and game marks
+- [x] Implement base UI (able to set mark, interactive board)
+- [ ] Detect game end states
+- [ ] Implement AI to play against
+- [ ] Implement resizable board
+
+You may launch Tic Tac Toe game with command by including the `Run.HC`, e.g. ```#include "Run"```.
+
 ![TicTacToe screenshot](/tictactoe.png?raw=true "Game screenshot")
 
 ## Useful references
