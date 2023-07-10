@@ -12,16 +12,18 @@ side-by-side with printable characters.
 Example usage:
 ```HexView("C:/Once.HC.Z", 8);```
 
-### TicTacToe
+### Tic-Tac-Toe
 
-TicTacToe game with AI. Work in progress. Goals:
+Tic-Tac-Toe game with AI. Work in progress. Goals:
 - [x] Draw board and game marks
 - [x] Implement base UI (able to set mark, interactive board)
 - [ ] Detect game end states
-- [ ] Implement AI to play against
-- [ ] Implement resizable board
+- [ ] Implement AI opponent
+- [ ] Add variations to mark sprites (rotate, shift, etc.)
 
-You may launch Tic Tac Toe game with command by including the `Run.HC`, e.g. ```#include "Run"```.
+- [ ] ? Implement Tic-Tac-Toe variation
+
+You may launch Tic-Tac-Toe game by including the Run.HC, e.g. `#include "Run"`.
 
 ![TicTacToe screenshot](/tictactoe.png?raw=true "Game screenshot")
 
