@@ -17,7 +17,7 @@ Example usage:
 Tic-Tac-Toe game with AI. Work in progress. Goals:
 - [x] Draw board and game marks
 - [x] Implement base UI (able to set mark, interactive board)
-- [ ] Detect game end states
+- [x] Detect game end states
 - [ ] Implement AI opponent
 - [ ] Add variations to mark sprites (rotate, shift, etc.)
 
