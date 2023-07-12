@@ -69,7 +69,7 @@ $ID,-2$}
 U8 *PreviewStr(U8 *content, U64 size){
 $ID,2$U64 j;
 U64 sOffset = 0;
-U8 *str = MAlloc(size * 2 + 1); 
+U8 *str = MAlloc(size * 2 + 1); 
 U8 byte;
 
 for (j = 0; j < size; j++) {
@@ -88,3 +88,4 @@ str[sOffset] = 0;
 
 return str;
 $ID,-2$}
+
