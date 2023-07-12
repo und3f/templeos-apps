@@ -13,12 +13,11 @@ class BoardVector {
 
 class GameState
 {
-  U8 *board;
-
-  U8 curPlayer;
-  BoardVector winLine;
-
   U8 state;
+  U8 curPlayer;
+
+  U8 *board;
+  BoardVector winLine;
 } gameState;
 
 Bool checkBoardLine(U8 *board, BoardVector *v){
@@ -40,14 +39,14 @@ Bool checkBoardLine(U8 *board, BoardVector *v){
   return TRUE;
 }
 
-Bool isBoardFilled(GameState *g){
+Bool isBoardFilled(GameState *g){
   U64 i;
   for (i = 0; i <BOARD_SIZE *BOARD_SIZE; i++){
     if (g->board[i] >= NUM_OF_PLAYERS){
       return FALSE;
     }
   }
-  return TRUE;
+  return TRUE;
 }
 
 #define macroCheckBoardLine if (checkBoardLine(g->board, v)){ return TRUE; }
