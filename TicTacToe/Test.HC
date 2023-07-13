@@ -95,7 +95,7 @@ U0 TestHorizontal(U8 y){
 U8 board[BOARD_SIZE*BOARD_SIZE] = {
   1, 0, 1,
   0, 1, 1,
-  0, 1, 0
+  0, 1, 0
 };
 
 U0 TestTie(){
@@ -104,7 +104,7 @@ U0 TestTie(){
 
   U64 i;
  
-  MemCpy(gameState.board, board, sizeof(board));
+  MemCpy(gameState.board, board, sizeof(board));
   if (!checkEndGame(&gameState)){
     "End State not detected\n";
     throw;

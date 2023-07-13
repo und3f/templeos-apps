@@ -39,7 +39,7 @@ Bool checkBoardLine(U8 *board, BoardVector *v){
   return TRUE;
 }
 
-Bool isBoardFilled(GameState *g){
+Bool isBoardFilled(GameState *g){
   U64 i;
   for (i = 0; i <BOARD_SIZE *BOARD_SIZE; i++){
     if (g->board[i] >= NUM_OF_PLAYERS){
@@ -52,7 +52,7 @@ Bool checkBoardLine(U8 *board, BoardVector *v){
 #define macroCheckBoardLine if (checkBoardLine(g->board, v)){ return TRUE; }
 Bool findWin(GameState *g){
   BoardVector *v = &(g->winLine);
-
+
   // Check diagonals
   v->xStart = 0; v->xInc = 1;
   v->yInc = 1; v->yStart = 0;
@@ -103,6 +103,7 @@ U0 gameMove(GameState *g, U8 cell){
 
   checkEndGame(g);
 }
+
 
 U0 PrepareGame(){
   I64 boardLength = sizeof(U8)*BOARD_SIZE*BOARD_SIZE;
