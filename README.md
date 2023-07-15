@@ -42,7 +42,7 @@ Tic-Tac-Toe game with AI. Work in progress. Goals:
 You may launch Tic-Tac-Toe game by including the Run.HC:
 ```#include "Run";```
 
-![TicTacToe screenshot](/tictactoe.png?raw=true "Game screenshot")
+https://github.com/und3f/temple-os-apps/assets/168848/5e83dab6-33a4-4d9e-be0a-63fcf616cef4
 
 ## Useful references
 1. [Temple OS](https://templeos.org/)
