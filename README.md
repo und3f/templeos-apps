@@ -32,12 +32,8 @@ HexView("C:/Once.HC.Z", 8);
 
 ### Tic-Tac-Toe
 
-Tic-Tac-Toe game with AI. Work in progress. Goals:
-- [x] Draw board and game marks
-- [x] Implement base UI (able to set mark, interactive board)
-- [x] Detect game end states
-- [x] Add variations to marks (dithering)
-- [ ] Implement AI opponent
+Tic-Tac-Toe game with AI. Future plans:
+- [ ] Add UI controls for players, board size
 
 You may launch Tic-Tac-Toe game by including the Run.HC:
 ```#include "Run";```

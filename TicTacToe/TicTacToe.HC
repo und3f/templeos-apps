@@ -1,4 +1,4 @@
-#define BOARD_SIZE  3
+#define BOARD_SIZE 3
 #define NUM_OF_PLAYERS 2
 
 #define STATE_WAIT_PLAYER 0
@@ -16,22 +16,22 @@ class GameState
   U8 state;
   U8 curPlayer;
 
-  U8 *board;
+  U8 board[BOARD_SIZE*BOARD_SIZE];
   BoardVector winLine;
-} gameState;
+};
 
 Bool checkBoardLine(U8 *board, BoardVector *v){
-  U8 i;
-  U8 value = board[v->yStart * BOARD_SIZE + v->xStart];
+  I64 i;
+  I64 value = board[v->yStart * BOARD_SIZE + v->xStart];
   if (value == 0xff){
     return FALSE;
   }
   
   for (i = 1; i <BOARD_SIZE; i++){
-    U8 x = v->xStart +v->xInc *i;
-    U8 y = v->yStart +v->yInc * i;
+    I64 x = v->xStart +v->xInc *i;
+    I64 y = v->yStart +v->yInc * i;
 
-    U8 curValue = board[y *BOARD_SIZE+x];
+    I64 curValue = board[y *BOARD_SIZE+x];
     if (curValue != value){
       return FALSE;
     }
@@ -40,7 +40,7 @@ Bool checkBoardLine(U8 *board, BoardVector *v){
 }
 
 Bool isBoardFilled(GameState *g){
-  U64 i;
+  I64 i;
   for (i = 0; i <BOARD_SIZE *BOARD_SIZE; i++){
     if (g->board[i] >= NUM_OF_PLAYERS){
       return FALSE;
@@ -52,7 +52,7 @@ Bool isBoardFilled(GameState *g){
 #define macroCheckBoardLine if (checkBoardLine(g->board, v)){ return TRUE; }
 Bool findWin(GameState *g){
   BoardVector *v = &(g->winLine);
-
+
   // Check diagonals
   v->xStart = 0; v->xInc = 1;
   v->yInc = 1; v->yStart = 0;
@@ -63,7 +63,7 @@ Bool findWin(GameState *g){
   macroCheckBoardLine
 
   // Check grid lines
-  U8 i;
+  I64 i;
   for (i = 0; i <BOARD_SIZE; i++){
     // Vertical line
     v->xStart = i; v->xInc = 0;
@@ -105,15 +105,13 @@ U0 gameMove(GameState *g, U8 cell){
 }
 
 
-U0 PrepareGame(){
-  I64 boardLength = sizeof(U8)*BOARD_SIZE*BOARD_SIZE;
-  gameState.board = CAlloc(boardLength);
-  MemSetU8(gameState.board, -1, boardLength);
+U0 PrepareGame(GameState *gameState){
+  I64 boardLength = BOARD_SIZE*BOARD_SIZE;
+  MemSetU8(gameState->board, -1, boardLength);
 
-  gameState.curPlayer = 0;
-  gameState.state = STATE_WAIT_PLAYER;
+  gameState->curPlayer = 0;
+  gameState->state = STATE_WAIT_PLAYER;
 }
 
-U0 DestroyGame(){
-  Free(gameState.board);
+U0 DestroyGame(GameState *gameState){
 }
