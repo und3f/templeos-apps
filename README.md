@@ -38,7 +38,7 @@ Tic-Tac-Toe game with AI. Future plans:
 You may launch Tic-Tac-Toe game by including the Run.HC:
 ```#include "Run";```
 
-https://github.com/und3f/temple-os-apps/assets/168848/5e83dab6-33a4-4d9e-be0a-63fcf616cef4
+https://github.com/und3f/temple-os-apps/assets/168848/159eada6-e3c3-4026-b307-fedee1a57f4b
 
 ## Useful references
 1. [Temple OS](https://templeos.org/)
