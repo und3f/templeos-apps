@@ -74,7 +74,7 @@ I64 MinMax(GameStateAI *s, U8 depth, Bool maximizingPlayer, U8 *retBestMove = NU
   return value;
 }
 
-U8 FindMove(GameStateAI *s, U8 depth = BOARD_SIZE *BOARD_SIZE) {
+U8 FindMove(GameStateAI *s, U8 depth = BOARD_SIZE *BOARD_SIZE) {
   U8 move = -1;
 
   MinMax(s, depth, TRUE, &move);  

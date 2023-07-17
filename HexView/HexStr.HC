@@ -88,4 +88,3 @@ str[sOffset] = 0;
 
 return str;
 $ID,-2$}
-

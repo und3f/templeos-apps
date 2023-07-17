@@ -1,4 +1,4 @@
-#define BOARD_SIZE 3
+#define BOARD_SIZE 3
 #define NUM_OF_PLAYERS 2
 
 #define STATE_WAIT_PLAYER 0

@@ -183,7 +183,7 @@ U0 TestAI() {
   TestAIScore;
   TestAIMove;
 }
-
+
 TestGameState;
 TestAI;
 

@@ -29,7 +29,7 @@ Free(content);
 $ID,-2$}
 
 // Hex offset, colon, and space
-#define FIXED_SYMBOLS_COUNT (6 + 1 + 1)
+#define FIXED_SYMBOLS_COUNT (6 + 1 + 1)
 
 // Hex view, space, and char
 #define SYMBOLS_PER_BYTE (2 + 1 + 1)
