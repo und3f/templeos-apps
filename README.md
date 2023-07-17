@@ -1,12 +1,18 @@
-# Temple OS Applications
+# TempleOS Applications
 
-Applications created during recreational programming sessions.
+The applications were created during recreational programming sessions. The
+source code is developed solely in TempleOS, so the source files are in DolDoc
+format. Since GitHub has limited syntax highlights for DolDoc you may find
+constructions like `$ID,2$` (which is an indentation). Also sources contain
+binary data because DolDoc keeps sprites in the source files, so some files are
+marked as binary by GitHub. It is recommended to read the source code with the
+TempleOS editor.
 
 ## Supplemental ISO
 
-All applications are available in [Supplemental.ISO.C](Supplemental.ISO.C), you
-may use it as CD-ROM image for TOS VM. To mount in Temple OS execute next
-commands:
+All applications are available in [Supplemental.ISO.C](Supplemental.ISO.C).
+You may use it as a CD-ROM image for TempleOS virtual machine. To mount in
+TempleOS execute the next commands:
 
 ```
 MountIDEAuto;
@@ -16,13 +22,28 @@ Dir;
 
 ## Applications
 
+### Tic-Tac-Toe
+
+Tic-Tac-Toe game with sprites, dithering, and AI. Future plans:
+- Control player (player vs ai, ai vs ai, ai vs player, etc...)
+- Support dynamic board size
+
+You may launch Tic-Tac-Toe game by including the `Run.HC`:
+```
+#include "TicTacToe/Run";
+```
+
+https://github.com/und3f/temple-os-apps/assets/168848/159eada6-e3c3-4026-b307-fedee1a57f4b
+
 ### HexView
 
 HexView'er is a viewer for binary files. Display HEX presentation of content
 side-by-side with printable characters.
 
 Run with:
-```#include "HexView/Run";```
+```
+#include "HexView/Run";
+```
 
 Programmatic usage:
 ```
@@ -30,19 +51,22 @@ Programmatic usage:
 HexView("C:/Once.HC.Z", 8);
 ```
 
-### Tic-Tac-Toe
+## Repository build process
 
-Tic-Tac-Toe game with AI. Future plans:
-- [ ] Add UI controls for players, board size
+I use a macro (I've put it on personal menu for quick access), which removes
+cursor marks and prepares a supplemental ISO file:
+```
+$MA,"Make supplemental ISO",LM="CursorRem(\"::/Home/Dev/*\"); RedSeaISO(\"::/Supplemental\", \"::/Home/Dev/\");\n"$
+```
 
-You may launch Tic-Tac-Toe game by including the Run.HC:
-```#include "Run";```
-
-https://github.com/und3f/temple-os-apps/assets/168848/159eada6-e3c3-4026-b307-fedee1a57f4b
+Then I mount TempleOS hard drive using [modified
+fusefat](https://github.com/alanswx/fusefat/) that supports the `offset` option
+(see second reference on how to find the offset) and rsync files into the repo
+directory.
 
 ## Useful references
-1. [Temple OS](https://templeos.org/)
-1. [Tsoding Temple OS repo for
+1. [TempleOS](https://templeos.org/)
+1. [Tsoding TempleOS repo for
    AOC-2021](https://gitlab.com/tsoding/aoc-2021/-/tree/master). Take a look at
    [sync.sh](https://gitlab.com/tsoding/aoc-2021/-/blob/master/sync.sh) and
    [mount.sh](https://gitlab.com/tsoding/aoc-2021/-/blob/master/mount.sh)
