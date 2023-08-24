@@ -41,7 +41,7 @@ TempleOS Cloud Theme
 It is based on Terry's TempleOS Theme, some code scarps were taken from
 AfterEgypt.
 
-Theme media TBD
+![tos-cloud-logo](https://github.com/und3f/temple-os-apps/assets/168848/82a38974-fdb6-4a7c-b799-5ffc4632b6e2)
 
 ### HexView
 
