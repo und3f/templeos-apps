@@ -35,6 +35,14 @@ You may launch Tic-Tac-Toe game by including the `Run.HC`:
 
 https://github.com/und3f/temple-os-apps/assets/168848/159eada6-e3c3-4026-b307-fedee1a57f4b
 
+### TOSC Theme
+TempleOS Cloud Theme
+
+It is based on Terry's TempleOS Theme, some code scarps were taken from
+AfterEgypt.
+
+Theme media TBD
+
 ### HexView
 
 HexView'er is a viewer for binary files. Display HEX presentation of content
