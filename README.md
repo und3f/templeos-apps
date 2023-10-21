@@ -22,6 +22,29 @@ Dir;
 
 ## Applications
 
+### Spirit
+
+Spirit is TempleOS guest agent, a helper background task which helps to exchange
+information between TempleOS and host machine.
+
+Supported operations:
+* Execute user command (spawn new TempleOS window and run provided command)
+* Execute command silently and return result to host machine
+* Get TempleOS clipboard to the host machine
+* Set TempleOS clipboard to the value
+
+Spirit designed to be run on a boot, to install copy entire folder to home driver and add to the end of `~/HomeSys.HC`
+```
+#include "~/Spirit/Load"
+StartUpSpirit;
+```
+After reboot Spirit would load, you may provide commands using serial console.
+Available commands:
+* `User` -- spawn TempleOS task and execute next line
+* `Exec` -- execute next line silently and return output
+* `ClipGet` -- return clipboard's content
+* `ClipSet` -- set clipboard to the next line
+
 ### Tic-Tac-Toe
 
 Tic-Tac-Toe game with sprites, dithering, and AI. Future plans:
