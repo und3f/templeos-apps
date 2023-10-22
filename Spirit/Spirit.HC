@@ -3,6 +3,8 @@
 
 #define ST_SPIRIT_CMD "SPIRIT_COMMANDS"
 
+U0 (*logger)(U8 fmt, ...) = &Print;
+
 U8 CommGetChar(I64 port)
 {
   U8 b;
@@ -27,6 +29,40 @@ U0 CommReadLine(I64 port, U8 *buf)
   buf[len] = 0;
 }
 
+U8 *SpiritRecv()
+{
+  U8 *cmd;
+  U16 size;
+
+  size.u8[0] = CommGetChar(COMM_PORT_NUM);
+  size.u8[1] = CommGetChar(COMM_PORT_NUM);
+  
+  cmd = MAlloc(size +1);
+
+  I64 i;
+  for (i = 0; i < size; i++) {
+    cmd[i] = CommGetChar(COMM_PORT_NUM);
+  }
+
+  cmd[size] = 0;
+  return cmd;
+}
+
+U0 SpiritSend(U8 *data, U16 size)
+{
+  CommPutChar(COMM_PORT_NUM, size.u8[0]);
+  CommPutChar(COMM_PORT_NUM, size.u8[1]);
+ 
+  I64 i;
+  for (i = 0; i < size; i++)
+    CommPutChar(COMM_PORT_NUM, data[i]);
+}
+
+U0 SpiritSendStr(U8 *str)
+{
+  SpiritSend(str, StrLen(str));
+}
+
 CFifoI64* stdout;
 
 Bool StubPutKey(I64, I64)
@@ -41,7 +77,6 @@ Bool GrabPutS(U8 *st)
   return TRUE;
 }
 
-U0 (*logger)(U8 fmt, ...) = &Print;
 
 #define CMD_USER_TASK "User"
 #define CMD_EXECUTE   "Exec"
@@ -56,17 +91,17 @@ U8* SpiritDefaultHandler()
 
 U8* SpiritCmdUserTask()
 {
-  U8 in[MAX_LINE];
-  CommReadLine(COMM_PORT_NUM, in);
+  U8 *in = SpiritRecv();
+
   User("%s\n", in);
 
+  Free(in);
   return NULL;
 }
 
 U8* SpiritCmdExecute()
 {
-  U8 in[MAX_LINE];
-  CommReadLine(COMM_PORT_NUM, in);
+  U8 *in = SpiritRecv();
 
   stdout = FifoI64New(256);
   CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0x1000000);
@@ -90,20 +125,21 @@ U8* SpiritCmdExecute()
   
 
   FifoI64Del(stdout);
+  Free(in);
 
   return out;
 }
 
 U8* SpiritCmdClipSet()
 {
-  U8 in[MAX_LINE];
-  CommReadLine(COMM_PORT_NUM, in);
+  U8 *in = SpiritRecv();
 
   CDoc *doc=sys_clip_doc;
 
   ClipDel;
   DocPrint(doc, "%s", in);
-
+  
+  Free(in);
   return NULL;
 }
 
@@ -139,8 +175,7 @@ U0 LoadCommands()
 }
 
 U0 WaitCommand(){
-  U8 cmd[MAX_LINE];
-  CommReadLine(COMM_PORT_NUM, cmd);
+  U8 *cmd = SpiritRecv();
 
   logger("Spirit:%s\n", cmd);
   U8* (*handler)();
@@ -151,16 +186,16 @@ U0 WaitCommand(){
     handler = handlers[i];
 
   U8* resp = handler();
-  if (resp != NULL)
-    CommPrint(COMM_PORT_NUM, resp);
+  SpiritSendStr(resp);
 
   Free(resp);
+  Free(cmd);
 }
 
 U0 InitSpirit(){
   LoadCommands;
   CommInit8n1(COMM_PORT_NUM, 115200);
-  CommPrint(COMM_PORT_NUM, "Spirit v0.2\r\n");
+//  CommPrint(COMM_PORT_NUM, "Spirit v0.2\r\n");
  
   while (TRUE) {
     WaitCommand;

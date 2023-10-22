@@ -30,20 +30,32 @@ information between TempleOS and host machine.
 Supported operations:
 * Execute user command (spawn new TempleOS window and run provided command)
 * Execute command silently and return result to host machine
-* Get TempleOS clipboard to the host machine
-* Set TempleOS clipboard to the value
+* Get TempleOS clipboard
+* Set TempleOS clipboard
 
 Spirit designed to be run on a boot, to install copy entire folder to home driver and add to the end of `~/HomeSys.HC`
 ```
 #include "~/Spirit/Load"
 StartUpSpirit;
 ```
-After reboot Spirit would load, you may provide commands using serial console.
-Available commands:
-* `User` -- spawn TempleOS task and execute next line
-* `Exec` -- execute next line silently and return output
-* `ClipGet` -- return clipboard's content
-* `ClipSet` -- set clipboard to the next line
+
+#### Spirit Host Agent
+
+Communication with Spirit guest agent is made using host agent which is available in [./Spirit/hostagent](./Spirit/hostagent).
+Execute `make` to build it on Linux system.
+
+To make serial console available for the Spirit host agent you may share it
+using tcp server. For the QEMU KVM add `-serial` options:
+```
+-serial telnet:localhost:4321,server=on,wait=off
+```
+
+And then execute command using host agent
+```
+./spirit-agent -c tcp:127.0.0.1:4321 exec '"Hello World!\n";'
+```
+
+See `./spirit-agent -h` for detailed usage.
 
 ### Tic-Tac-Toe
 
