@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/un.h>
+#include <stddef.h>
 #include <unistd.h>
 
 void usage(int exitCode, const char *errorMsg, ...);
@@ -85,7 +87,6 @@ void usage(int exitCode, const char *errorMsg, ...)
 int spiritConnect(const char *connStr)
 {
   int s;
-  struct sockaddr_in servAddr;
 
   char *hostStr = strchr(connStr, CONN_STR_DELIMITER);
   if (hostStr == NULL)
@@ -94,9 +95,9 @@ int spiritConnect(const char *connStr)
   *hostStr = 0;
   hostStr++;
   
-  const int protoStrLen = hostStr - connStr;
+  if (strcasecmp(connStr, "tcp") == 0) {
+    struct sockaddr_in servAddr;
 
-  if (strncasecmp(connStr, "tcp", protoStrLen) == 0) {
     char *portStr = strchr(hostStr+1, CONN_STR_DELIMITER);
     if (portStr == NULL)
       usage(2, "Missing connection port.");
@@ -122,14 +123,30 @@ int spiritConnect(const char *connStr)
     if (inet_pton(AF_INET, hostStr, &servAddr.sin_addr) <= 0)
     {
       fprintf(stderr, "Address resolution failure: %s\n", hostStr);
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
-    int status;
-    if (status = connect(s, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
+    if (connect(s, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
     {
       fprintf(stderr, "Connection failed.\n");
-      exit(1);
+      exit(EXIT_FAILURE);
+    }
+  } else if (strcasecmp(connStr, "unix") == 0) {
+    struct sockaddr_un addr;
+
+    s = socket(PF_LOCAL, SOCK_STREAM, 0);
+    if (s < 0) {
+      fprintf(stderr, "Socket creation error.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, hostStr, sizeof(addr.sun_path) - 1);
+
+    if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+      fprintf(stderr, "Connection to %s failed.\n", addr.sun_path);
+      exit(EXIT_FAILURE);
     }
 
   } else {
@@ -156,10 +173,6 @@ char* spiritRecv(int socket)
 {
   unsigned char b;
   msg_size_t size;
-
-  // Remove trash
-  for (int i = 0; i < 12; i++)
-   recv(socket, &b, 1, 0);
 
   // Get Size
   recv(socket, &b, 1, 0);
@@ -196,6 +209,8 @@ void spiritExec(int socket, int argc, char **argv)
 
     spiritSendStr(socket, "clipSet");
     spiritSendStr(socket, argv[1]);
+  } else {
+    usage(EXIT_FAILURE, "Unknown operation `%s`.", op);
   }
 
   char *r = spiritRecv(socket);

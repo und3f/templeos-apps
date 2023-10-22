@@ -50,7 +50,7 @@ Execute `make` to build it on Linux system.
 To make serial console available for the Spirit host agent you may share it
 using tcp server. For the QEMU KVM add `-serial` options:
 ```
--serial telnet:localhost:4321,server=on,wait=off
+-serial tcp:localhost:4321,server=on,wait=off
 ```
 
 And then execute command using host agent
