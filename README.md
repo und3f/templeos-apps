@@ -24,6 +24,8 @@ Dir;
 
 ### Spirit
 
+https://github.com/und3f/templeos-apps/assets/168848/1a6b4c54-21e1-458d-95be-73e4fb7113a6
+
 Spirit is TempleOS guest agent, a helper background task which helps to exchange
 information between TempleOS and host machine.
 
