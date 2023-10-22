@@ -150,13 +150,6 @@ U8*SpiritCmdClipGet()
   return clip;
 }
 
-U8*SpiritCmdClipGet()
-{
-  I64 len;
-  U8* clip = DocSave(sys_clip_doc, &len);  
-  return clip;
-}
-
 U8* (*handlers)()[4] = {
   &SpiritCmdUserTask,
   &SpiritCmdExecute,

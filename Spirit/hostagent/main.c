@@ -191,7 +191,11 @@ void spiritExec(int socket, int argc, char **argv)
   } else if (strcasecmp("clip-get", op) == 0) {
     spiritSendStr(socket, "clipGet");
   } else if (strcasecmp("clip-set", op) == 0) {
+    if (argc < 2)
+      usage(2, "Missing `%s` operation argument.", op);
+
     spiritSendStr(socket, "clipSet");
+    spiritSendStr(socket, argv[1]);
   }
 
   char *r = spiritRecv(socket);
