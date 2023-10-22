@@ -35,7 +35,8 @@ Supported operations:
 * Get TempleOS clipboard
 * Set TempleOS clipboard
 
-Spirit designed to be run on a boot, to install copy entire folder to home driver and add to the end of `~/HomeSys.HC`
+Spirit designed to be run on a boot, to install run `Install.HC`, and add to
+the end of `~/HomeSys.HC`
 ```
 #include "~/Spirit/Load"
 StartUpSpirit;
