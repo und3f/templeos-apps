@@ -3,6 +3,8 @@
 
 #define ST_SPIRIT_CMD "SPIRIT_COMMANDS"
 
+#define PROMPT "Spirit"
+
 U0 (*logger)(U8 fmt, ...) = &Print;
 
 U8 CommGetChar(I64 port)
@@ -188,8 +190,8 @@ U0 WaitCommand(){
 U0 InitSpirit(){
   LoadCommands;
   CommInit8n1(COMM_PORT_NUM, 115200);
-//  CommPrint(COMM_PORT_NUM, "Spirit v0.2\r\n");
- 
+  
+  SpiritSendStr(PROMPT);
   while (TRUE) {
     WaitCommand;
   }
@@ -198,7 +200,7 @@ U0 InitSpirit(){
 U0 StartUpSpirit()
 {
   logger = &AdamLog;
-  CTask *guestOS = Spawn(
+  Spawn(
     &InitSpirit,
     ,
     "Spirit guest agent"
