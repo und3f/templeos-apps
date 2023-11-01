@@ -65,16 +65,22 @@ U0 SpiritSendStr(U8 *str)
   SpiritSend(str, StrLen(str));
 }
 
-CFifoI64* stdout;
+U8* stdout = NULL;
 
-Bool StubPutKey(I64, I64)
+Bool StubPutKey(I64 ch, I64)
 {
+  U8 *buf = MStrPrint("%s%c", stdout, ch);
+  Free(stdout);
+  stdout = buf;
+
   return TRUE;
 }
 
-Bool GrabPutS(U8 *st)
+Bool GrabPutS(U8 *str)
 {
-  FifoI64Ins(stdout, StrNew(st));
+  U8 *buf = MStrPrint("%s%s", stdout, str);
+  Free(stdout);
+  stdout = buf;
 
   return TRUE;
 }
@@ -105,31 +111,23 @@ U8* SpiritCmdExecute()
 {
   U8 *in = SpiritRecv();
 
-  stdout = FifoI64New(256);
+  stdout = MStrPrint("");
   CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0x1000000);
 
-  CCmpCtrl *cc=CmpCtrlNew(in,$LK,"CCF_DONT_FREE_BUF",A="MN:CCF_DONT_FREE_BUF"$);
+  CCmpCtrl *cc=CmpCtrlNew(in);
   Lex(cc);
-  ExeCmdLine(cc);
+
+  U8 *excpt = NULL;
+  try {
+    ExeCmdLine(cc);
+  } catch {
+    Fs->catch_except = TRUE;
+  }
 
   KeyDevRem(kdev);
+  CmpCtrlDel(cc);
 
-  U8 *out = MStrPrint("");
-
-  U8 *nextStr;
-  
-  while (FifoI64Rem(stdout, &nextStr))
-  {
-    U8 *tmp = MStrPrint("%s%s", out, nextStr);
-    Free(out);
-    out = tmp;
-  }
-  
-
-  FifoI64Del(stdout);
-  Free(in);
-
-  return out;
+  return stdout;
 }
 
 U8* SpiritCmdClipSet()
