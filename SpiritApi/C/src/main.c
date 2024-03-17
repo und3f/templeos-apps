@@ -1,3 +1,5 @@
+#include "spirit.h"
+
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <limits.h>
@@ -5,18 +7,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/un.h>
 #include <stddef.h>
 #include <unistd.h>
 
 void usage(int exitCode, const char *errorMsg, ...);
 
-typedef unsigned short msg_size_t;
-int spiritConnect(const char *connStr);
-void spiritSendStr(int socket, const char *str);
-void spiritSend(int socket, const char *str, msg_size_t size);
-void spiritExec(int socket, int argc, char **argv);
+void spiritExec(struct SpiritConnection conn, int argc, char **argv);
+void spiritClose(struct SpiritConnection conn);
 
 int main(int argc, char **argv)
 {
@@ -48,9 +46,9 @@ int main(int argc, char **argv)
   if (optind >= argc)
     usage(2, "Missing operation.");
 
-  int ssock = spiritConnect(port);
+  struct SpiritConnection ssock = spiritConnect(port);
   spiritExec(ssock, argc - optind, argv + optind);
-  close(ssock);
+  spiritClose(ssock);
 }
 
 void usage(int exitCode, const char *errorMsg, ...)
@@ -84,9 +82,9 @@ void usage(int exitCode, const char *errorMsg, ...)
 }
 
 #define CONN_STR_DELIMITER ':'
-int spiritConnect(const char *connStr)
+struct SpiritConnection spiritConnect(const char *connStr)
 {
-  int s;
+  struct SpiritConnection spirit;
 
   char *hostStr = strchr(connStr, CONN_STR_DELIMITER);
   if (hostStr == NULL)
@@ -111,8 +109,8 @@ int spiritConnect(const char *connStr)
     if (*parsePtr != 0)
       usage(2, "Invalid port: %s", portStr + 1);
 
-    s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0) {
+    spirit.socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (spirit.socket < 0) {
       fprintf(stderr, "Socket creation error\n");
       exit(1);
     }
@@ -126,7 +124,7 @@ int spiritConnect(const char *connStr)
       exit(EXIT_FAILURE);
     }
 
-    if (connect(s, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
+    if (connect(spirit.socket, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
     {
       fprintf(stderr, "Connection failed.\n");
       exit(EXIT_FAILURE);
@@ -134,8 +132,8 @@ int spiritConnect(const char *connStr)
   } else if (strcasecmp(connStr, "unix") == 0) {
     struct sockaddr_un addr;
 
-    s = socket(PF_LOCAL, SOCK_STREAM, 0);
-    if (s < 0) {
+    spirit.socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+    if (spirit.socket < 0) {
       fprintf(stderr, "Socket creation error.\n");
       exit(EXIT_FAILURE);
     }
@@ -144,7 +142,7 @@ int spiritConnect(const char *connStr)
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, hostStr, sizeof(addr.sun_path) - 1);
 
-    if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    if (connect(spirit.socket, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
       fprintf(stderr, "Connection to %s failed.\n", addr.sun_path);
       exit(EXIT_FAILURE);
     }
@@ -154,7 +152,7 @@ int spiritConnect(const char *connStr)
     usage(2, "Unknown protocol: %s.", connStr);
   }
 
-  return s;
+  return spirit;
 }
 
 void spiritSendStr(int socket, const char *str)
@@ -192,28 +190,28 @@ char* spiritRecv(int socket)
   return buf;
 }
 
-void spiritExec(int socket, int argc, char **argv)
+void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
 {
   const char *op = argv[0];
   if (strcasecmp("user", op) == 0 || strcasecmp("exec", op) == 0) {
     if (argc < 2)
       usage(2, "Missing `%s` operation argument.", op);
 
-    spiritSendStr(socket, argv[0]);
-    spiritSendStr(socket, argv[1]);
+    spiritSendStr(spirit.socket, argv[0]);
+    spiritSendStr(spirit.socket, argv[1]);
   } else if (strcasecmp("clip-get", op) == 0) {
-    spiritSendStr(socket, "clipGet");
+    spiritSendStr(spirit.socket, "clipGet");
   } else if (strcasecmp("clip-set", op) == 0) {
     if (argc < 2)
       usage(2, "Missing `%s` operation argument.", op);
 
-    spiritSendStr(socket, "clipSet");
-    spiritSendStr(socket, argv[1]);
+    spiritSendStr(spirit.socket, "clipSet");
+    spiritSendStr(spirit.socket, argv[1]);
   } else {
     usage(EXIT_FAILURE, "Unknown operation `%s`.", op);
   }
 
-  char *r = spiritRecv(socket);
+  char *r = spiritRecv(spirit.socket);
   printf(r);
   free(r);
 }
