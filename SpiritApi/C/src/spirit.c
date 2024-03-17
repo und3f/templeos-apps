@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/un.h>
+#include <errno.h>
 
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
@@ -87,19 +88,31 @@ struct SpiritConnection spiritConnect(const char *connStr)
   return spirit;
 }
 
-void spiritSendStr(int socket, const char *str)
+void spiritSendStr(struct SpiritConnection conn, const char *str)
 {
   size_t len = strlen(str);
-  spiritSend(socket, str, len);
+  rs232SendPackage(conn, str, len);
 }
 
-void spiritSend(int socket, const char *str, msg_size_t size)
+void rs232SendBytes(struct SpiritConnection conn, const char *str, msg_size_t size)
 {
-  send(socket, &size, sizeof(msg_size_t), 0);
-  send(socket, str, size, 0);
+  for (int i = 0; i < size; ) {
+    int ret = send(conn.socket, str + i, size - i, 0);
+    if (ret < 0) {
+      fprintf(stderr, "Error during writing RS232 socket bytes: %s\n", strerror(errno));
+      exit(-1);
+    }
+    i += ret;
+  }
 }
 
-char* spiritRecv(int socket)
+void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t size)
+{
+  send(conn.socket, &size, sizeof(msg_size_t), 0);
+  send(conn.socket, str, size, 0);
+}
+
+char* rs232RecvPackage(int socket)
 {
   unsigned char b;
   msg_size_t size;
@@ -129,21 +142,21 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
     if (argc < 2)
       usage(2, "Missing `%s` operation argument.", op);
 
-    spiritSendStr(spirit.socket, argv[0]);
-    spiritSendStr(spirit.socket, argv[1]);
+    spiritSendStr(spirit, argv[0]);
+    spiritSendStr(spirit, argv[1]);
   } else if (strcasecmp("clip-get", op) == 0) {
-    spiritSendStr(spirit.socket, "clipGet");
+    spiritSendStr(spirit, "clipGet");
   } else if (strcasecmp("clip-set", op) == 0) {
     if (argc < 2)
       usage(2, "Missing `%s` operation argument.", op);
 
-    spiritSendStr(spirit.socket, "clipSet");
-    spiritSendStr(spirit.socket, argv[1]);
+    spiritSendStr(spirit, "clipSet");
+    spiritSendStr(spirit, argv[1]);
   } else {
     usage(EXIT_FAILURE, "Unknown operation `%s`.", op);
   }
 
-  char *r = spiritRecv(spirit.socket);
+  char *r = rs232RecvPackage(spirit.socket);
   printf(r);
   free(r);
 }
