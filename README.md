@@ -55,10 +55,10 @@ using tcp server. For the QEMU KVM add `-serial` options:
 
 And then execute command using host agent
 ```
-./spirit-agent -c tcp:127.0.0.1:4321 exec '"Hello World!\n";'
+./build/spirit-agent -c tcp:127.0.0.1:4321 exec '"Hello World!\n";'
 ```
 
-See `./spirit-agent -h` for detailed usage.
+See `./build/spirit-agent -h` for detailed usage.
 
 ### Tic-Tac-Toe
 

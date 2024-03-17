@@ -21,13 +21,4 @@ struct RS232Configuration {
   int  stop_bits;
 };
 
-struct SpiritConnection {
-  int socket;
-  
-  struct RS232Configuration rs232Rate;
-};
-
-
-typedef unsigned short msg_size_t;
-
 #endif
