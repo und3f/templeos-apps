@@ -78,7 +78,7 @@ public CComm *CommInit8n1(I64 port,I64 baud)
     FifoU8Del(c->RX_fifo);
     FifoU8Del(c->TX_fifo);
   }
-  c->RX_fifo=FifoU8New(256);
+  c->RX_fifo=FifoU8New(25600);
   c->TX_fifo=FifoU8New(256);
   OutU8(c->base+UART_LCR,0);	//Set for IER
   OutU8(c->base+UART_IER,0);	//Disable all IRQ

@@ -1,4 +1,3 @@
-#include "rs232.h"
 #include "spirit.h"
 #include "app.h"
 
@@ -13,6 +12,8 @@
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
 }
+
+void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size);
 
 #define CONN_STR_DELIMITER ':'
 struct SpiritConnection spiritConnect(const char *connStr)
@@ -91,26 +92,33 @@ struct SpiritConnection spiritConnect(const char *connStr)
 void spiritSendStr(struct SpiritConnection conn, const char *str)
 {
   size_t len = strlen(str);
+  if (len > 0xffff) {
+    fprintf(stderr, "The data exceed maximum supported size of 65535 bytes.\n");
+    exit(1);
+  }
   rs232SendPackage(conn, str, len);
 }
 
-void rs232SendBytes(struct SpiritConnection conn, const char *str, msg_size_t size)
+void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t size)
+{
+  rs232SendBytes(conn, &size, sizeof(msg_size_t));
+  rs232SendBytes(conn, str, size);
+}
+
+void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size)
 {
   for (int i = 0; i < size; ) {
-    int ret = send(conn.socket, str + i, size - i, 0);
+    int ret = send(conn.socket, str + i, 1, 0);
     if (ret < 0) {
-      fprintf(stderr, "Error during writing RS232 socket bytes: %s\n", strerror(errno));
-      exit(-1);
+      fprintf(stderr,
+          "Error during writing RS232 socket bytes: %s\n", strerror(errno)
+      );
+      exit(1);
     }
     i += ret;
   }
 }
 
-void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t size)
-{
-  send(conn.socket, &size, sizeof(msg_size_t), 0);
-  send(conn.socket, str, size, 0);
-}
 
 char* rs232RecvPackage(int socket)
 {

@@ -7,13 +7,20 @@
 
 U0 (*logger)(U8 fmt, ...) = &Print;
 
-U8 CommGetChar(I64 port)
+U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool abort = NULL)
 {
   U8 b;
+  I64 spentTicks = 0;
 
   
   while (!(FifoU8Rem(comm_ports[port].RX_fifo, &b))) {
     Sleep 10;
+    if (abortTicks > 0) {
+      if (++spentTicks >= abortTicks) {
+        *abort = TRUE;
+        return 0xFF;
+      }
+    }
   }
 
   return b;
@@ -117,7 +124,6 @@ U8* SpiritCmdExecute()
   CCmpCtrl *cc=CmpCtrlNew(in);
   Lex(cc);
 
-  U8 *excpt = NULL;
   try {
     ExeCmdLine(cc);
   } catch {
@@ -170,7 +176,7 @@ U0 LoadCommands()
 U0 WaitCommand(){
   U8 *cmd = SpiritRecv();
 
-  logger("Spirit:%s\n", cmd);
+  logger("Spiritremote cmd: %s\n", cmd);
   U8* (*handler)();
   handler = &SpiritDefaultHandler;
 

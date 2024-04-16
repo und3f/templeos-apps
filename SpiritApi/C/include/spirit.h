@@ -1,12 +1,8 @@
 #ifndef SPIRIT_H
 #define SPIRIT_H
 
-#include "rs232.h"
-
 struct SpiritConnection {
   int socket;
-  
-  struct RS232Configuration rs232Rate;
 };
 
 typedef unsigned short msg_size_t;

@@ -44,7 +44,8 @@ StartUpSpirit;
 
 #### Spirit Host Client (API)
 
-Communication with Spirit guest agent is made using host agent which is available in [./SpiritApi/C](./SpiritApi/C).
+Communication with Spirit guest agent is made using host agent which is
+available in [./SpiritApi/C](./SpiritApi/C).
 Execute `make` to build it on Linux system.
 
 To make serial console available for the Spirit host agent you may share it
