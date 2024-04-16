@@ -42,9 +42,10 @@ the end of `~/HomeSys.HC`
 StartUpSpirit;
 ```
 
-#### Spirit Host Agent
+#### Spirit Host Client (API)
 
-Communication with Spirit guest agent is made using host agent which is available in [./Spirit/hostagent](./Spirit/hostagent).
+Communication with Spirit guest agent is made using host agent which is
+available in [./SpiritApi/C](./SpiritApi/C).
 Execute `make` to build it on Linux system.
 
 To make serial console available for the Spirit host agent you may share it
@@ -55,10 +56,10 @@ using tcp server. For the QEMU KVM add `-serial` options:
 
 And then execute command using host agent
 ```
-./spirit-agent -c tcp:127.0.0.1:4321 exec '"Hello World!\n";'
+./build/spirit-agent -c tcp:127.0.0.1:4321 exec '"Hello World!\n";'
 ```
 
-See `./spirit-agent -h` for detailed usage.
+See `./build/spirit-agent -h` for detailed usage.
 
 ### Tic-Tac-Toe
 
