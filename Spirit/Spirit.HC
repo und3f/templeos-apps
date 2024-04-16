@@ -192,6 +192,7 @@ U0 WaitCommand(){
 }
 
 U0 InitSpirit(){
+  logger("Spirit started on %s%d\n\n", "COM", COMM_PORT_NUM);
   LoadCommands;
   CommInit8n1(COMM_PORT_NUM, 115200);
   
