@@ -1,8 +1,9 @@
-#define INS_DIR "~/Spirit"
+#define INS_DIR "::/Apps/Spirit"
 
 if (!FileFind(INS_DIR,, FUF_JUST_DIRS))
   DirMk(INS_DIR);
 
+Cd(__DIR__);
 CopyTree("*", INS_DIR, FALSE);
 
 "\n";

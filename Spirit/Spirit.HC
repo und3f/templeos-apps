@@ -97,8 +97,12 @@ Bool GrabPutS(U8 *str)
 #define CMD_EXECUTE   "Exec"
 #define CMD_CLIP_SET  "ClipSet"
 #define CMD_CLIP_GET  "ClipGet"
+#define CMD_PING      "Ping"
 
-#define RESP_UNKNOWN_CMD "Unknown command\r\n"
+#define LINE_END "\r\n"
+#define RESP_UNKNOWN_CMD "Unknown command" LINE_END
+#define RESP_PONG "Pong" LINE_END
+
 U8* SpiritDefaultHandler()
 {
   return MStrPrint(RESP_UNKNOWN_CMD);
@@ -156,11 +160,17 @@ U8*SpiritCmdClipGet()
   return clip;
 }
 
-U8* (*handlers)()[4] = {
+U8* SpiritCmdPing()
+{
+  return MStrPrint(RESP_PONG);
+}
+
+U8* (*handlers)()[5] = {
   &SpiritCmdUserTask,
   &SpiritCmdExecute,
   &SpiritCmdClipSet,
-  &SpiritCmdClipGet
+  &SpiritCmdClipGet,
+  &SpiritCmdPing
 };
 
 U0 LoadCommands()
@@ -170,7 +180,9 @@ U0 LoadCommands()
 	CMD_USER_TASK "\0"
         CMD_EXECUTE "\0"
         CMD_CLIP_SET "\0"
-        CMD_CLIP_GET "\0");
+        CMD_CLIP_GET "\0"
+        CMD_PING "\0"
+  );
 }
 
 U0 WaitCommand(){
@@ -211,3 +223,4 @@ U0 StartUpSpirit()
     "Spirit guest agent"
   );
 }
+ 

@@ -161,7 +161,10 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
     spiritSendStr(spirit, "clipSet");
     spiritSendStr(spirit, argv[1]);
   } else {
-    usage(EXIT_FAILURE, "Unknown operation `%s`.", op);
+    spiritSendStr(spirit, op);
+    for (int i = 2; i < argc; ++i) {
+      spiritSendStr(spirit, argv[i]);
+    }
   }
 
   char *r = rs232RecvPackage(spirit.socket);

@@ -28,6 +28,7 @@ void usage(int exitCode, const char *errorMsg, ...)
       "  exec <command>\tExecute the command silently and return the result.\n"
       "  clip-get\t\tSet host system's clibpoard to the TempleOS clipboard content.\n"
       "  clip-set\t\tSet TempleOS clipboard content to the host system's clipboard.\n"
+      "  ping\t\tPing Spirit agent.\n"
       ,
       program_invocation_short_name);
 
