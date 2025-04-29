@@ -1,5 +1,8 @@
 #define COMM_PORT_NUM 1
+#define BAUD 115200
 #define MAX_LINE 200
+#define TICK_TIMEOUT 10
+#define WAIT_TICKS 300 / TICK_TIMEOUT
 
 #define ST_SPIRIT_CMD "SPIRIT_COMMANDS"
 
@@ -7,14 +10,17 @@
 
 U0 (*logger)(U8 fmt, ...) = &Print;
 
-U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool abort = NULL)
+U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool *abort = NULL)
 {
   U8 b;
   I64 spentTicks = 0;
+  if(abort) {
+    *abort = FALSE;
+  }
 
   
   while (!(FifoU8Rem(comm_ports[port].RX_fifo, &b))) {
-    Sleep 10;
+    Sleep TICK_TIMEOUT;
     if (abortTicks > 0) {
       if (++spentTicks >= abortTicks) {
         *abort = TRUE;
@@ -40,17 +46,24 @@ U0 CommReadLine(I64 port, U8 *buf)
 
 U8 *SpiritRecv()
 {
+  Bool abort;
   U8 *cmd;
   U16 size;
 
-  size.u8[0] = CommGetChar(COMM_PORT_NUM);
-  size.u8[1] = CommGetChar(COMM_PORT_NUM);
+  size.u8[0] = CommGetChar(COMM_PORT_NUM, WAIT_TICKS, &abort);
+  if (abort) { return NULL; }
+  size.u8[1] = CommGetChar(COMM_PORT_NUM, WAIT_TICKS, &abort);
+  if (abort) { return NULL; }
   
   cmd = MAlloc(size +1);
 
   I64 i;
   for (i = 0; i < size; i++) {
-    cmd[i] = CommGetChar(COMM_PORT_NUM);
+    cmd[i] = CommGetChar(COMM_PORT_NUM, WAIT_TICKS, &abort);
+    if (abort) {
+      Free(cmd);
+      return NULL;
+    }
   }
 
   cmd[size] = 0;
@@ -188,6 +201,11 @@ U0 LoadCommands()
 U0 WaitCommand(){
   U8 *cmd = SpiritRecv();
 
+  if (cmd == NULL) {
+    Sleep(TICK_TIMEOUT);
+    return;
+  }
+
   logger("Spiritremote cmd: %s\n", cmd);
   U8* (*handler)();
   handler = &SpiritDefaultHandler;
@@ -206,10 +224,10 @@ U0 WaitCommand(){
 U0 InitSpirit(){
   logger("Spirit started on %s%d\n\n", "COM", COMM_PORT_NUM);
   LoadCommands;
-  CommInit8n1(COMM_PORT_NUM, 115200);
+  CommInit8n1(COMM_PORT_NUM, BAUD);
   
-  SpiritSendStr(PROMPT);
   while (TRUE) {
+    SpiritSendStr(PROMPT);
     WaitCommand;
   }
 }
