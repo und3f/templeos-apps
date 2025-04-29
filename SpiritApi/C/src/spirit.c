@@ -172,3 +172,10 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
   free(r);
 }
 
+void spiritWaitSync(struct SpiritConnection spirit) {
+  char *r = rs232RecvPackage(spirit.socket);
+  if (strcmp(SPIRIT_PROMPT, r) != 0) {
+    printf("Invalid sync prompt: %s\n", r);
+    exit(1);
+  }
+}

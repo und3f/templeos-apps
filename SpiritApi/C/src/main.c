@@ -34,6 +34,7 @@ int main(int argc, char **argv)
     usage(2, "Missing operation.");
 
   struct SpiritConnection ssock = spiritConnect(port);
+  spiritWaitSync(ssock);
   spiritExec(ssock, argc - optind, argv + optind);
   spiritClose(ssock);
 }
