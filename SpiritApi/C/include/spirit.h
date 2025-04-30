@@ -2,6 +2,7 @@
 #define SPIRIT_H
 
 #define SPIRIT_PROMPT "Spirit"
+#define SPIRIT_PROMPT_MESSAGE "\6\0" SPIRIT_PROMPT
 
 struct SpiritConnection {
   int socket;
