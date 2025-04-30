@@ -173,9 +173,25 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
 }
 
 void spiritWaitSync(struct SpiritConnection spirit) {
-  char *r = rs232RecvPackage(spirit.socket);
-  if (strcmp(SPIRIT_PROMPT, r) != 0) {
-    printf("Invalid sync prompt: %s\n", r);
-    exit(1);
+  unsigned char b;
+
+  for (int j = 0; j < sizeof(SPIRIT_PROMPT_MESSAGE)*2; j++) {
+    for (int i = 0; i < sizeof(SPIRIT_PROMPT_MESSAGE); i++) {
+      ssize_t s = recv(spirit.socket, &b, 1, 0);
+      if (s < 1) {
+        perror("Host sync failure:");
+        exit(1);
+      }
+      if (SPIRIT_PROMPT_MESSAGE[i] != b) {
+        break;
+      }
+
+      if (i == sizeof(SPIRIT_PROMPT)) {
+        return;
+      }
+    }
   }
+
+  printf("Host sync failed\n");
+  exit(1);
 }

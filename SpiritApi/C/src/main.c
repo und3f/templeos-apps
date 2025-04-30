@@ -1,7 +1,7 @@
+#include <unistd.h>
+
 #include "spirit.h"
 #include "app.h"
-
-#include <unistd.h>
 
 int main(int argc, char **argv)
 {
