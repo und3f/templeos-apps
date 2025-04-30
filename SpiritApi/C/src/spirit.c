@@ -175,7 +175,7 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
 void spiritWaitSync(struct SpiritConnection spirit) {
   unsigned char b;
 
-  for (int j = 0; j < sizeof(SPIRIT_PROMPT_MESSAGE)*2; j++) {
+  for (int j = 0; j < sizeof(SPIRIT_PROMPT_MESSAGE); j++) {
     for (int i = 0; i < sizeof(SPIRIT_PROMPT_MESSAGE); i++) {
       ssize_t s = recv(spirit.socket, &b, 1, 0);
       if (s < 1) {
