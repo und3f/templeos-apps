@@ -8,6 +8,9 @@
 #include <string.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <time.h>
+
+#define BYTE_TRANSMIT_DURATION 86
 
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
@@ -107,7 +110,10 @@ void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t 
 
 void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size)
 {
+  struct timespec start, end;
   for (int i = 0; i < size; ) {
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+
     int ret = send(conn.socket, str + i, 1, 0);
     if (ret < 0) {
       fprintf(stderr,
@@ -116,6 +122,12 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
       exit(1);
     }
     i += ret;
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+    if (delta_us < BYTE_TRANSMIT_DURATION) {
+      usleep(BYTE_TRANSMIT_DURATION - delta_us);
+    }
   }
 }
 
@@ -176,17 +188,23 @@ void spiritWaitSync(struct SpiritConnection spirit) {
   unsigned char b;
 
   for (int j = 0; j < sizeof(SPIRIT_PROMPT_MESSAGE); j++) {
-    for (int i = 0; i < sizeof(SPIRIT_PROMPT_MESSAGE); i++) {
+    for (int i = 0; i < sizeof(SPIRIT_PROMPT_MESSAGE)-1; i++) {
       ssize_t s = recv(spirit.socket, &b, 1, 0);
       if (s < 1) {
         perror("Host sync failure:");
         exit(1);
       }
+#ifdef DEBUG
+      printf("Sync(%d): expected: %b, recv: %b\n", i, SPIRIT_PROMPT_MESSAGE[i], b);
+#endif
       if (SPIRIT_PROMPT_MESSAGE[i] != b) {
         break;
       }
 
-      if (i == sizeof(SPIRIT_PROMPT)) {
+      if (i == sizeof(SPIRIT_PROMPT_MESSAGE)-2) {
+#ifdef DEBUG
+      printf("Sync success!\n");
+#endif
         return;
       }
     }
