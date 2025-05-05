@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "spirit.h"
 #include "app.h"
@@ -8,7 +9,8 @@ int main(int argc, char **argv)
 
   char *port = NULL;
   int c;
-  while ((c = getopt(argc, argv, "hc:")) != -1) {
+  bool sync = true;
+  while ((c = getopt(argc, argv, "hc:n")) != -1) {
     switch (c)
     {
       case 'h':
@@ -17,6 +19,10 @@ int main(int argc, char **argv)
 
       case 'c':
         port = optarg;
+        break;
+
+      case 'n':
+        sync = false;
         break;
 
       case '?':
@@ -34,7 +40,9 @@ int main(int argc, char **argv)
     usage(2, "Missing operation.");
 
   struct SpiritConnection ssock = spiritConnect(port);
-  spiritWaitSync(ssock);
+  if (sync) {
+    spiritWaitSync(ssock);
+  }
   spiritExec(ssock, argc - optind, argv + optind);
   spiritClose(ssock);
 }

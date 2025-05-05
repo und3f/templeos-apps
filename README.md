@@ -47,6 +47,7 @@ StartUpSpirit;
 Communication with Spirit guest agent is made using host agent which is
 available in [./SpiritApi/C](./SpiritApi/C).
 Execute `make` to build it on Linux system.
+For verbose output build with `make CFLAGS=-DDEBUG`.
 
 To make serial console available for the Spirit host agent you may share it
 using tcp server. For the QEMU KVM add `-serial` options:
