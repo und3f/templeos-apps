@@ -4,7 +4,7 @@ include_dir=include
 src_dir=src
 build_out=build
 
-CFLAGS=-I$(include_dir)
+override CFLAGS += -I$(include_dir)
 
 headers=$(wildcard $(include_dir)/*.h)
 sources=$(wildcard $(src_dir)/*.c)

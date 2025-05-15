@@ -1,8 +1,9 @@
 #define COMM_PORT_NUM 1
 #define BAUD 115200
 #define MAX_LINE 200
-#define TICK_TIMEOUT 10
-#define WAIT_TICKS 300 / TICK_TIMEOUT
+#define TICK_TIMEOUT 100
+#define WAIT_TIMEOUT 300
+#define WAIT_TICKS WAIT_TIMEOUT / TICK_TIMEOUT
 
 #define ST_SPIRIT_CMD "SPIRIT_COMMANDS"
 
@@ -54,7 +55,6 @@ U8 *SpiritRecv()
   if (abort) { return NULL; }
   size.u8[1] = CommGetChar(COMM_PORT_NUM, WAIT_TICKS, &abort);
   if (abort) { return NULL; }
-  
   cmd = MAlloc(size +1);
 
   I64 i;
@@ -72,12 +72,7 @@ U8 *SpiritRecv()
 
 U0 SpiritSend(U8 *data, U16 size)
 {
-  CommPutChar(COMM_PORT_NUM, size.u8[0]);
-  CommPutChar(COMM_PORT_NUM, size.u8[1]);
- 
-  I64 i;
-  for (i = 0; i < size; i++)
-    CommPutChar(COMM_PORT_NUM, data[i]);
+  CommPutMessage(COMM_PORT_NUM, data, size);
 }
 
 U0 SpiritSendStr(U8 *str)
@@ -120,6 +115,7 @@ U8* SpiritDefaultHandler()
 {
   return MStrPrint(RESP_UNKNOWN_CMD);
 }
+
 
 U8* SpiritCmdUserTask()
 {
@@ -202,7 +198,6 @@ U0 WaitCommand(){
   U8 *cmd = SpiritRecv();
 
   if (cmd == NULL) {
-    Sleep(TICK_TIMEOUT);
     return;
   }
 
@@ -225,9 +220,11 @@ U0 InitSpirit(){
   logger("Spirit started on %s%d\n\n", "COM", COMM_PORT_NUM);
   LoadCommands;
   CommInit8n1(COMM_PORT_NUM, BAUD);
-  
+
   while (TRUE) {
     SpiritSendStr(PROMPT);
+
+    Sleep(3*WAIT_TIMEOUT);
     WaitCommand;
   }
 }
