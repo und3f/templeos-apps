@@ -1,6 +1,10 @@
+#define MAX_MSG_SIZE 0xFFFF
+
 #define COMM_PORT_NUM 1
 #define BAUD 115200
+
 #define MAX_LINE 200
+
 #define TICK_TIMEOUT 100
 #define WAIT_TIMEOUT 300
 #define WAIT_TICKS WAIT_TIMEOUT / TICK_TIMEOUT
@@ -81,21 +85,31 @@ U0 SpiritSendStr(U8 *str)
 }
 
 U8* stdout = NULL;
+I32 stdoutInd = 0;
 
 Bool StubPutKey(I64 ch, I64)
 {
-  U8 *buf = MStrPrint("%s%c", stdout, ch);
-  Free(stdout);
-  stdout = buf;
+  if (stdoutInd >= MAX_MSG_SIZE) {
+    return FALSE;
+  }
+
+  stdout[stdoutInd] = ch;
+  stdoutInd++;
 
   return TRUE;
 }
 
 Bool GrabPutS(U8 *str)
 {
-  U8 *buf = MStrPrint("%s%s", stdout, str);
-  Free(stdout);
-  stdout = buf;
+  if (stdoutInd >= MAX_MSG_SIZE) {
+    return FALSE;
+  }
+
+  I64 len = StrLen(str);
+  len = MinI64(stdoutInd +len, MAX_MSG_SIZE);
+
+  MemCpy(stdout+stdoutInd, str, len-stdoutInd);
+  stdoutInd = len;
 
   return TRUE;
 }
@@ -131,8 +145,10 @@ U8* SpiritCmdExecute()
 {
   U8 *in = SpiritRecv();
 
-  stdout = MStrPrint("");
-  CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0x1000000);
+  stdout = MAlloc(MAX_MSG_SIZE+1);
+  stdoutInd = 0;
+
+  CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0xA000000);
 
   CCmpCtrl *cc=CmpCtrlNew(in);
   Lex(cc);
@@ -145,7 +161,9 @@ U8* SpiritCmdExecute()
 
   KeyDevRem(kdev);
   CmpCtrlDel(cc);
+  // CmpCtrlDel also free `in`
 
+  stdout[stdoutInd] = 0;
   return stdout;
 }
 
@@ -224,7 +242,6 @@ U0 InitSpirit(){
   while (TRUE) {
     SpiritSendStr(PROMPT);
 
-    Sleep(3*WAIT_TIMEOUT);
     WaitCommand;
   }
 }
