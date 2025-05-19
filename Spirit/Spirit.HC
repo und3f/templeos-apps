@@ -148,6 +148,9 @@ U8* SpiritCmdExecute()
   stdout = MAlloc(MAX_MSG_SIZE+1);
   stdoutInd = 0;
 
+  CDoc *old = Fs->put_doc;
+  Fs->put_doc = DocNew;
+
   CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0xA000000);
 
   CCmpCtrl *cc=CmpCtrlNew(in);
@@ -162,6 +165,14 @@ U8* SpiritCmdExecute()
   KeyDevRem(kdev);
   CmpCtrlDel(cc);
   // CmpCtrlDel also free `in`
+
+  U8 *docContent = DocSave(Fs->put_doc);
+  GrabPutS(docContent);  
+  
+  Free(docContent);  
+  DocDel(Fs->put_doc);
+
+  Fs->put_doc = old;
 
   stdout[stdoutInd] = 0;
   return stdout;
