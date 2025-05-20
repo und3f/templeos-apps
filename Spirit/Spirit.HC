@@ -25,7 +25,7 @@ U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool *abort = NULL)
 
   
   while (!(FifoU8Rem(comm_ports[port].RX_fifo, &b))) {
-    Sleep TICK_TIMEOUT;
+    Sleep(TICK_TIMEOUT);
     if (abortTicks > 0) {
       if (++spentTicks >= abortTicks) {
         *abort = TRUE;
@@ -35,18 +35,6 @@ U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool *abort = NULL)
   }
 
   return b;
-}
-
-U0 CommReadLine(I64 port, U8 *buf)
-{
-  I64 len, c;
-  
-  for (len = 0; len < MAX_LINE - 1; len++) {
-    c = CommGetChar(port);
-    buf[len] = c;
-    if (c == '\r' ||c == '\n') break;
-  }
-  buf[len] = 0;
 }
 
 U8 *SpiritRecv()
@@ -120,6 +108,7 @@ Bool GrabPutS(U8 *str)
 #define CMD_CLIP_SET  "ClipSet"
 #define CMD_CLIP_GET  "ClipGet"
 #define CMD_PING      "Ping"
+#define CMD_SCREEN_SHOT "ScreenShot"
 
 #define LINE_END "\r\n"
 #define RESP_UNKNOWN_CMD "Unknown command" LINE_END
@@ -144,6 +133,9 @@ U8* SpiritCmdUserTask()
 U8* SpiritCmdExecute()
 {
   U8 *in = SpiritRecv();
+  if (in == NULL) {
+    return NULL;
+  }
 
   stdout = MAlloc(MAX_MSG_SIZE+1);
   stdoutInd = 0;
@@ -178,6 +170,24 @@ U8* SpiritCmdExecute()
   return stdout;
 }
 
+U8* SpiritCmdScreenShot()
+{
+  CDC *dc = DCScrnCapture;
+
+  I64 imgSize = dc->width_internal * dc->height;
+  U32 *img = MAlloc(imgSize + sizeof(I32)*2);
+
+  *(img) = dc->width_internal;
+  *(img+1) = dc->height;
+  MemCpy(img + 2, dc->body, imgSize);
+
+  DCDel(dc);
+
+  // TODO:transfer image data
+  Free(img);
+  return NULL;
+}
+
 U8* SpiritCmdClipSet()
 {
   U8 *in = SpiritRecv();
@@ -203,12 +213,13 @@ U8* SpiritCmdPing()
   return MStrPrint(RESP_PONG);
 }
 
-U8* (*handlers)()[5] = {
+U8* (*handlers)()[6] = {
   &SpiritCmdUserTask,
   &SpiritCmdExecute,
   &SpiritCmdClipSet,
   &SpiritCmdClipGet,
-  &SpiritCmdPing
+  &SpiritCmdPing,
+  &SpiritCmdScreenShot
 };
 
 U0 LoadCommands()
@@ -220,6 +231,7 @@ U0 LoadCommands()
         CMD_CLIP_SET "\0"
         CMD_CLIP_GET "\0"
         CMD_PING "\0"
+        CMD_SCREEN_SHOT "\0"
   );
 }
 

@@ -18,7 +18,9 @@ it in your start-up scripts.
 
 #define COMf_ENABLED	0
 
-#define MAX_SPIRIT_MSG 25600
+#define MAX_SPIRIT_MSG 256
+#define TRANSMISSION_TIMEOUT 80
+
 class CComm
 {
   I64	base,
@@ -111,15 +113,15 @@ public CComm *CommInit8n1(I64 port,I64 baud)
 public U0 CommPutMessage(I64 port,U8 *b, I16 size)
 {
   CComm *c=&comm_ports[port];
-  PUSHFD
-  CLI
 
   FifoU8Ins(c->TX_fifo, size.u8[0]);
   FifoU8Ins(c->TX_fifo, size.u8[1]);
   I16 i;
   for (i = 0; i < size; i++) {
-    FifoU8Ins$FG,5$(c->TX_fifo, b[i]);  
+    while (!FifoU8Ins$FG,5$(c->TX_fifo, b[i])) {
+      OutU8(c->base+UART_IER,2);	//RX and THR empty
+      Sleep(TRANSMISSION_TIMEOUT);
+    }
   }
   OutU8(c->base+UART_IER,2);	//RX and THR empty
-  POPFD
 }
