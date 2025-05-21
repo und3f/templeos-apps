@@ -8,10 +8,6 @@
 #include <string.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <time.h>
-
-#define MICROSECONDS_IN_SECOND 1000000
-#define BYTE_TRANSMIT_DURATION (MICROSECONDS_IN_SECOND / 115200) * 9
 
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
