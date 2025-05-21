@@ -165,8 +165,7 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
     spiritSendStr(spirit, "clipSet");
     spiritSendStr(spirit, argv[1]);
   } else {
-    spiritSendStr(spirit, op);
-    for (int i = 2; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i) {
       spiritSendStr(spirit, argv[i]);
     }
   }
