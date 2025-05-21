@@ -119,7 +119,6 @@ public U0 CommPutMessage(I64 port,U8 *b, U16 size)
   FifoU8Ins(c->TX_fifo, size.u8[1]);
   OutU8(c->base+UART_IER,2);	//RX and THR empty
 
-
   I16 i;
   for (i = 0; i < size; i++) {
     while (!FifoU8Ins$FG,5$(c->TX_fifo, b[i])) {

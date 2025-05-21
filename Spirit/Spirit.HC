@@ -21,7 +21,6 @@ U8 CommGetChar(I64 port, I64 abortTicks = 0, Bool *abort = NULL)
     *abort = FALSE;
   }
 
-  
   while (!(FifoU8Rem(comm_ports[port].RX_fifo, &b))) {
     Sleep(TICK_TIMEOUT);
     if (abortTicks > 0) {
