@@ -10,6 +10,9 @@
 #include <errno.h>
 #include <time.h>
 
+#define MICROSECONDS_IN_SECOND 1000000
+#define BYTE_TRANSMIT_DURATION (MICROSECONDS_IN_SECOND / 115200) * 9
+
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
 }
@@ -120,6 +123,12 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
       exit(1);
     }
     i += ret;
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+    if (delta_us < BYTE_TRANSMIT_DURATION) {
+      usleep(BYTE_TRANSMIT_DURATION - delta_us);
+    }
   }
 }
 
@@ -165,7 +174,8 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
     spiritSendStr(spirit, "clipSet");
     spiritSendStr(spirit, argv[1]);
   } else {
-    for (int i = 0; i < argc; ++i) {
+    spiritSendStr(spirit, op);
+    for (int i = 2; i < argc; ++i) {
       spiritSendStr(spirit, argv[i]);
     }
   }
