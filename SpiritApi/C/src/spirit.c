@@ -8,7 +8,6 @@
 #include <string.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <time.h>
 
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
@@ -108,10 +107,7 @@ void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t 
 
 void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size)
 {
-  struct timespec start, end;
   for (int i = 0; i < size; ) {
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-
     int ret = send(conn.socket, str + i, 1, 0);
     if (ret < 0) {
       fprintf(stderr,
@@ -171,7 +167,7 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
   }
 
   char *r = rs232RecvPackage(spirit.socket);
-  printf(r);
+  printf("%s", r);
   free(r);
 }
 
