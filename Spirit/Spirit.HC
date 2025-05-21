@@ -3,9 +3,7 @@
 #define COMM_PORT_NUM 1
 #define BAUD 115200
 
-#define MAX_LINE 200
-
-#define TICK_TIMEOUT 100
+#define TICK_TIMEOUT 5
 #define WAIT_TIMEOUT 300
 #define WAIT_TICKS WAIT_TIMEOUT / TICK_TIMEOUT
 
@@ -62,7 +60,7 @@ U8 *SpiritRecv()
   return cmd;
 }
 
-U0 SpiritSend(U8 *data, U16 size)
+U0 SpiritSend(U8 *data, U64 size)
 {
   CommPutMessage(COMM_PORT_NUM, data, size);
 }
@@ -108,7 +106,6 @@ Bool GrabPutS(U8 *str)
 #define CMD_CLIP_SET  "ClipSet"
 #define CMD_CLIP_GET  "ClipGet"
 #define CMD_PING      "Ping"
-#define CMD_SCREEN_SHOT "ScreenShot"
 
 #define LINE_END "\r\n"
 #define RESP_UNKNOWN_CMD "Unknown command" LINE_END
@@ -123,7 +120,6 @@ U8* SpiritDefaultHandler()
 U8* SpiritCmdUserTask()
 {
   U8 *in = SpiritRecv();
-
   User("%s\n", in);
 
   Free(in);
@@ -146,9 +142,9 @@ U8* SpiritCmdExecute()
   CKeyDevEntry *kdev = KeyDevAdd(&StubPutKey, &GrabPutS, 0xA000000);
 
   CCmpCtrl *cc=CmpCtrlNew(in);
-  Lex(cc);
-
   try {
+    Lex(cc);
+
     ExeCmdLine(cc);
   } catch {
     Fs->catch_except = TRUE;
@@ -168,24 +164,6 @@ U8* SpiritCmdExecute()
 
   stdout[stdoutInd] = 0;
   return stdout;
-}
-
-U8* SpiritCmdScreenShot()
-{
-  CDC *dc = DCScrnCapture;
-
-  I64 imgSize = dc->width_internal * dc->height;
-  U32 *img = MAlloc(imgSize + sizeof(I32)*2);
-
-  *(img) = dc->width_internal;
-  *(img+1) = dc->height;
-  MemCpy(img + 2, dc->body, imgSize);
-
-  DCDel(dc);
-
-  // TODO:transfer image data
-  Free(img);
-  return NULL;
 }
 
 U8* SpiritCmdClipSet()
@@ -213,13 +191,12 @@ U8* SpiritCmdPing()
   return MStrPrint(RESP_PONG);
 }
 
-U8* (*handlers)()[6] = {
+U8* (*handlers)()[5] = {
   &SpiritCmdUserTask,
   &SpiritCmdExecute,
   &SpiritCmdClipSet,
   &SpiritCmdClipGet,
   &SpiritCmdPing,
-  &SpiritCmdScreenShot
 };
 
 U0 LoadCommands()
@@ -231,7 +208,6 @@ U0 LoadCommands()
         CMD_CLIP_SET "\0"
         CMD_CLIP_GET "\0"
         CMD_PING "\0"
-        CMD_SCREEN_SHOT "\0"
   );
 }
 

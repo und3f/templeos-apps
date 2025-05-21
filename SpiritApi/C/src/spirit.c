@@ -111,10 +111,7 @@ void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t 
 
 void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size)
 {
-  struct timespec start, end;
   for (int i = 0; i < size; ) {
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-
     int ret = send(conn.socket, str + i, 1, 0);
     if (ret < 0) {
       fprintf(stderr,
@@ -123,12 +120,6 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
       exit(1);
     }
     i += ret;
-
-    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-    uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-    if (delta_us < BYTE_TRANSMIT_DURATION) {
-      usleep(BYTE_TRANSMIT_DURATION - delta_us);
-    }
   }
 }
 
@@ -181,7 +172,7 @@ void spiritExec(struct SpiritConnection spirit, int argc, char **argv)
   }
 
   char *r = rs232RecvPackage(spirit.socket);
-  printf(r);
+  printf("%s", r);
   free(r);
 }
 

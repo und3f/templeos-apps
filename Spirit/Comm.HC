@@ -18,8 +18,9 @@ it in your start-up scripts.
 
 #define COMf_ENABLED	0
 
-#define MAX_SPIRIT_MSG 256
-#define TRANSMISSION_TIMEOUT 80
+#define RX_BUFFER 2560
+#define TX_BUFFER 256
+#define TRANSMISSION_TIMEOUT 0
 
 class CComm
 {
@@ -88,8 +89,8 @@ public CComm *CommInit8n1(I64 port,I64 baud)
     FifoU8Del(c->RX_fifo);
     FifoU8Del(c->TX_fifo);
   }
-  c->RX_fifo=FifoU8New(MAX_SPIRIT_MSG);
-  c->TX_fifo=FifoU8New(MAX_SPIRIT_MSG);
+  c->RX_fifo=FifoU8New(RX_BUFFER);
+  c->TX_fifo=FifoU8New(TX_BUFFER);
   OutU8(c->base+UART_LCR,0);	//Set for IER
   OutU8(c->base+UART_IER,0);	//Disable all IRQ
   OutU8(c->base+UART_LCR,0x80);	//Enable baud rate control
@@ -110,12 +111,15 @@ public CComm *CommInit8n1(I64 port,I64 baud)
   return c;
 }
 
-public U0 CommPutMessage(I64 port,U8 *b, I16 size)
+public U0 CommPutMessage(I64 port,U8 *b, U16 size)
 {
   CComm *c=&comm_ports[port];
 
   FifoU8Ins(c->TX_fifo, size.u8[0]);
   FifoU8Ins(c->TX_fifo, size.u8[1]);
+  OutU8(c->base+UART_IER,2);	//RX and THR empty
+
+
   I16 i;
   for (i = 0; i < size; i++) {
     while (!FifoU8Ins$FG,5$(c->TX_fifo, b[i])) {
