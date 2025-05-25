@@ -8,6 +8,10 @@
 #include <string.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <time.h>
+
+#define SEND_SLEEP_INTERVAL_BYTES 128
+#define PACKAGE_SIZE_BITS 9
 
 void spiritClose(struct SpiritConnection conn) {
   close(conn.socket);
@@ -16,7 +20,7 @@ void spiritClose(struct SpiritConnection conn) {
 void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size);
 
 #define CONN_STR_DELIMITER ':'
-struct SpiritConnection spiritConnect(const char *connStr)
+struct SpiritConnection spiritConnect(const char *connStr, int baud)
 {
   struct SpiritConnection spirit;
 
@@ -86,6 +90,8 @@ struct SpiritConnection spiritConnect(const char *connStr)
     usage(2, "Unknown protocol: %s.", connStr);
   }
 
+  spirit.baud = baud;
+
   return spirit;
 }
 
@@ -107,6 +113,9 @@ void rs232SendPackage(struct SpiritConnection conn, const char *str, msg_size_t 
 
 void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t size)
 {
+  struct timespec start, end;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+
   for (int i = 0; i < size; ) {
     int ret = send(conn.socket, str + i, 1, 0);
     if (ret < 0) {
@@ -116,6 +125,18 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
       exit(1);
     }
     i += ret;
+
+    if (conn.baud > 0 && i % SEND_SLEEP_INTERVAL_BYTES == 0) {
+      clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+      uint64_t deltaUs = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+      uint64_t expectedDeltaUs = (SEND_SLEEP_INTERVAL_BYTES * PACKAGE_SIZE_BITS * 1000000) / conn.baud;
+      uint64_t diff = expectedDeltaUs - deltaUs;
+      if (diff > 0) {
+        usleep(diff);
+      }
+
+      clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    }
   }
 }
 

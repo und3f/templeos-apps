@@ -6,11 +6,12 @@
 
 struct SpiritConnection {
   int socket;
+  int baud;
 };
 
 typedef unsigned short msg_size_t;
 
-struct SpiritConnection spiritConnect(const char *connStr);
+struct SpiritConnection spiritConnect(const char *connStr, int baudControl);
 
 void spiritExec(struct SpiritConnection conn, int argc, char **argv);
 void spiritClose(struct SpiritConnection conn);
