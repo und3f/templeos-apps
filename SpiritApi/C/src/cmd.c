@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#define STR_INDIR(x) #x
+#define STR(x) STR_INDIR(x)
+
 void usage(int exitCode, const char *errorMsg, ...)
 {
   extern char *program_invocation_short_name;
@@ -24,6 +27,7 @@ void usage(int exitCode, const char *errorMsg, ...)
       "\t\t\t<tcp:host:port>, example -c tcp:localhost:1234\n"
       "\t\t\t<unix:unix-socket.file>, example -c unix:/tmp/serial.socket\n"
       "  -n\t\t\tDisable sync wait\n"
+      "  -b\t\t\tLimit outgoing baud rate, defaults to " STR(DEFAULT_BAUD) "\n"
       "Operations:\n"
       "  user <command>\tSpawn a task and execute the command.\n"
       "  exec <command>\tExecute the command silently and return the result.\n"

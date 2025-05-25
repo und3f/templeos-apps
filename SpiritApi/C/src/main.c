@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "spirit.h"
 #include "app.h"
@@ -10,7 +11,8 @@ int main(int argc, char **argv)
   char *port = NULL;
   int c;
   bool sync = true;
-  while ((c = getopt(argc, argv, "hc:n")) != -1) {
+  int baud = DEFAULT_BAUD;
+  while ((c = getopt(argc, argv, "hc:nb:")) != -1) {
     switch (c)
     {
       case 'h':
@@ -23,6 +25,10 @@ int main(int argc, char **argv)
 
       case 'n':
         sync = false;
+        break;
+
+      case 'b':
+        baud = atoi(optarg);
         break;
 
       case '?':
@@ -39,7 +45,7 @@ int main(int argc, char **argv)
   if (optind >= argc)
     usage(2, "Missing operation.");
 
-  struct SpiritConnection ssock = spiritConnect(port);
+  struct SpiritConnection ssock = spiritConnect(port, baud);
   if (sync) {
     spiritWaitSync(ssock);
   }

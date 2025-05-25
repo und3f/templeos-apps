@@ -109,6 +109,7 @@ Bool GrabPutS(U8 *str)
 #define LINE_END "\r\n"
 #define RESP_UNKNOWN_CMD "Unknown command" LINE_END
 #define RESP_PONG "Pong" LINE_END
+#define RESP_RECV_ERR  "Failure during command transmission" LINE_END
 
 U8* SpiritDefaultHandler()
 {
@@ -119,6 +120,10 @@ U8* SpiritDefaultHandler()
 U8* SpiritCmdUserTask()
 {
   U8 *in = SpiritRecv();
+  if (in == NULL) {
+    return StrNew(RESP_RECV_ERR);
+  }
+
   User("%s\n", in);
 
   Free(in);
@@ -129,7 +134,7 @@ U8* SpiritCmdExecute()
 {
   U8 *in = SpiritRecv();
   if (in == NULL) {
-    return NULL;
+    return StrNew(RESP_RECV_ERR);
   }
 
   stdout = MAlloc(MAX_MSG_SIZE+1);
