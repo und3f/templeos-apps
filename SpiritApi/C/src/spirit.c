@@ -90,6 +90,12 @@ struct SpiritConnection spiritConnect(const char *connStr, int baud)
     usage(2, "Unknown protocol: %s.", connStr);
   }
 
+  int sendBufSize = 1;
+  if (setsockopt(spirit.socket, SOL_SOCKET, SO_SNDBUF, &sendBufSize, sizeof(sendBufSize)) < 0) {
+    fprintf(stderr, "Failed to set socket options.\n");
+    exit(EXIT_FAILURE);
+  }
+
   spirit.baud = baud;
 
   return spirit;
@@ -115,6 +121,7 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
 {
   struct timespec start, end;
   clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+  const uint64_t expectedDeltaUs = (SEND_SLEEP_INTERVAL_BYTES * PACKAGE_SIZE_BITS * 1000000) / conn.baud;
 
   for (int i = 0; i < size; ) {
     int ret = send(conn.socket, str + i, 1, 0);
@@ -129,7 +136,6 @@ void rs232SendBytes(struct SpiritConnection conn, const void *str, msg_size_t si
     if (conn.baud > 0 && i % SEND_SLEEP_INTERVAL_BYTES == 0) {
       clock_gettime(CLOCK_MONOTONIC_RAW, &end);
       uint64_t deltaUs = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-      uint64_t expectedDeltaUs = (SEND_SLEEP_INTERVAL_BYTES * PACKAGE_SIZE_BITS * 1000000) / conn.baud;
       uint64_t diff = expectedDeltaUs - deltaUs;
       if (diff > 0) {
         usleep(diff);
