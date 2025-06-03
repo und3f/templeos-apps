@@ -121,6 +121,19 @@ U8* SpiritDefaultHandler()
   return MStrPrint(RESP_UNKNOWN_CMD);
 }
 
+U8 *StrPrintAnswer(CTask *task) {
+  if (task->answer_type&~1!=RT_I0) {
+    if (task->answer_type==RT_F64)
+      return MStrPrint("%8.6fs ansf=%15.7g\n",task->answer_time,task->answer);
+    else
+      return MStrPrint("%8.6fs ans=0x%08X=%d\n",task->answer_time,task->answer,task->answer);
+  } else {
+    return MStrPrint("%8.6fs\n",task->answer_time);
+  }
+
+
+  return NULL;
+}
 
 U8* SpiritCmdUserTask()
 {
@@ -129,10 +142,15 @@ U8* SpiritCmdUserTask()
     return StrNew(RESP_RECV_ERR);
   }
 
-  User("%s\n", in);
+  CTask *task = User;
+
+  XTalkWait(task, "%s;\n", in);
+  TaskExe(task,Fs,"",1<<JOBf_WAKE_MASTER|1<<JOBf_FOCUS_MASTER);
+  
+  U8 *out = StrPrintAnswer(task);
 
   Free(in);
-  return NULL;
+  return out;
 }
 
 U8* SpiritCmdExecute()
@@ -184,7 +202,6 @@ U8* SpiritCmdExecuteRaw()
 
   CTask *user = User;
   XTalkWait(user, "%s\n", in);
-
   DeathWait(&user, TRUE);
 
   return MStrPrint("%d", user->answer);
@@ -274,6 +291,7 @@ U0 InitSpirit(){
 U0 StartUpSpirit()
 {
   logger = &AdamLog;
+
   Spawn(
     &InitSpirit,
     ,
