@@ -4,7 +4,7 @@
 #define BAUD 115200
 
 #define TICK_TIMEOUT 5
-#define WAIT_TIMEOUT 300
+#define WAIT_TIMEOUT 500
 #define WAIT_TICKS WAIT_TIMEOUT / TICK_TIMEOUT
 
 #define ST_SPIRIT_CMD "SPIRIT_COMMANDS"
@@ -66,7 +66,11 @@ U0 SpiritSend(U8 *data, U64 size)
 
 U0 SpiritSendStr(U8 *str)
 {
-  SpiritSend(str, StrLen(str));
+  U64 len = 0;
+  if (str != NULL) {
+    len = StrLen(str);
+  }
+  SpiritSend(str, len);
 }
 
 U8* stdout = NULL;
@@ -105,6 +109,7 @@ Bool GrabPutS(U8 *str)
 #define CMD_CLIP_SET  "ClipSet"
 #define CMD_CLIP_GET  "ClipGet"
 #define CMD_PING      "Ping"
+#define CMD_EXECUTE_RAW "ExecRaw"
 
 #define LINE_END "\r\n"
 #define RESP_UNKNOWN_CMD "Unknown command" LINE_END
@@ -170,6 +175,21 @@ U8* SpiritCmdExecute()
   return stdout;
 }
 
+U8* SpiritCmdExecuteRaw()
+{
+  U8 *in = SpiritRecv();
+  if (in == NULL) {
+    return StrNew(RESP_RECV_ERR);
+  }
+
+  CTask *user = User;
+  XTalkWait(user, "%s\n", in);
+
+  DeathWait(&user, TRUE);
+
+  return MStrPrint("%d", user->answer);
+}
+
 U8* SpiritCmdClipSet()
 {
   U8 *in = SpiritRecv();
@@ -195,12 +215,13 @@ U8* SpiritCmdPing()
   return MStrPrint(RESP_PONG);
 }
 
-U8* (*handlers)()[5] = {
+U8* (*handlers)()[6] = {
   &SpiritCmdUserTask,
   &SpiritCmdExecute,
   &SpiritCmdClipSet,
   &SpiritCmdClipGet,
   &SpiritCmdPing,
+  &SpiritCmdExecuteRaw
 };
 
 U0 LoadCommands()
@@ -212,6 +233,7 @@ U0 LoadCommands()
         CMD_CLIP_SET "\0"
         CMD_CLIP_GET "\0"
         CMD_PING "\0"
+        CMD_EXECUTE_RAW "\0"
   );
 }
 
