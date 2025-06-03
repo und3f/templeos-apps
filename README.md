@@ -79,7 +79,9 @@ https://github.com/und3f/temple-os-apps/assets/168848/159eada6-e3c3-4026-b307-fe
 
 The folder contains visual code scraps.
 
-#### Abstract1
+#### Abstract #1
+
+https://github.com/user-attachments/assets/a9360b37-9ec3-4005-bc79-b9f4d4c1a953
 
 #### TempleOS Cloud Theme
 
