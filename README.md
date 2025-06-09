@@ -83,6 +83,10 @@ The folder contains visual code scraps.
 
 https://github.com/user-attachments/assets/a9360b37-9ec3-4005-bc79-b9f4d4c1a953
 
+#### Abstract #2
+
+https://github.com/user-attachments/assets/bdf9da8d-a1c3-4763-88f5-b29a79fe0a0f
+
 #### TempleOS Cloud Theme
 
 It is based on Terry's TempleOS Theme, some code scarps were taken from
