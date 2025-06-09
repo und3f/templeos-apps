@@ -146,6 +146,7 @@ U8* SpiritCmdUserTask()
 
   XTalkWait(task, "%s;\n", in);
   TaskExe(task,Fs,"",1<<JOBf_WAKE_MASTER|1<<JOBf_FOCUS_MASTER);
+  DeathWait(task);
   
   U8 *out = StrPrintAnswer(task);
 
@@ -200,11 +201,15 @@ U8* SpiritCmdExecuteRaw()
     return StrNew(RESP_RECV_ERR);
   }
 
-  CTask *user = User;
-  XTalkWait(user, "%s\n", in);
-  DeathWait(&user, TRUE);
+  CTask *task = User;
 
-  return MStrPrint("%d", user->answer);
+  XTalkWait(task, "%s;\n", in);
+  TaskExe(task,Fs,"",1<<JOBf_WAKE_MASTER|1<<JOBf_FOCUS_MASTER);
+  
+  U8 *out = StrPrintAnswer(task);
+
+  Free(in);
+  return out;
 }
 
 U8* SpiritCmdClipSet()
