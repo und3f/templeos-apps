@@ -7,8 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/un.h>
+#include <sys/socket.h>
 #include <errno.h>
 #include <time.h>
+
+// Use CLOCK_MONOTONIC instead for platforms where CLOCK_MONOTONIC_RAW is not available
+#ifndef CLOCK_MONOTONIC_RAW
+#define CLOCK_MONOTONIC_RAW CLOCK_MONOTONIC
+#endif
 
 #define SEND_SLEEP_INTERVAL_BYTES 128
 #define PACKAGE_SIZE_BITS 9
